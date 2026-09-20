@@ -1,0 +1,2838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>AgroIndia — Smart Kisan & AgriTech Marketplace</title>
+    <meta name="description" content="AI-Powered Agricultural Platform empowering Indian Farmers with 0% commission Digital Mandi, AI Crop Disease Detection, GIS Mapping, and Market Price Predictions.">
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Leaflet GIS Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js for Market Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --primary-glow: rgba(16, 185, 129, 0.35);
+            --secondary: #0f172a;
+            --secondary-light: #1e293b;
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.3);
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 32px -4px rgba(16, 185, 129, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top: env(safe-area-inset-top, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+            touch-action: manipulation;
+        }
+
+        h1, h2, h3, h4, .brand-font {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* --- SCROLLBAR UTILITIES --- */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- TOP TICKER (RESPONSIVE) --- */
+        .top-ticker {
+            background: linear-gradient(90deg, #064e3b, #0f172a);
+            color: #d1fae5;
+            font-size: 0.8rem;
+            padding: 6px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            position: relative;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        .ticker-items {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .ticker-highlight { color: #fcd34d; font-weight: 700; }
+        .ticker-helpline {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: white;
+            padding: 0.75rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+        }
+        .logo i {
+            color: var(--primary);
+            font-size: 1.6rem;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+        .logo span { color: var(--primary); }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .nav-item {
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Menu button for Mobile */
+        .mobile-menu-btn {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+        .mobile-menu-btn:hover { background: rgba(16, 185, 129, 0.2); color: var(--primary); }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px var(--primary-glow);
+            touch-action: manipulation;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px var(--primary-glow);
+            filter: brightness(1.08);
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-sm { padding: 6px 14px; font-size: 0.82rem; border-radius: 20px; }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+
+        .cart-icon-container {
+            position: relative;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .cart-icon-container:hover, .cart-icon-container:active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+        .cart-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 19px;
+            height: 19px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .user-badge-pill {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 4px 12px 4px 6px;
+            border-radius: 30px;
+        }
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        .user-role-tag {
+            font-size: 0.68rem;
+            background: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lang-btn:hover, .lang-btn:active {
+            background: rgba(255,255,255,0.2);
+            border-color: var(--primary);
+        }
+
+        /* --- MOBILE SLIDE-OVER DRAWER --- */
+        .drawer-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .drawer-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .mobile-drawer {
+            position: fixed;
+            top: 0; left: -310px; bottom: 0;
+            width: 300px;
+            max-width: 85vw;
+            background: #0f172a;
+            color: white;
+            z-index: 2200;
+            box-shadow: 4px 0 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: calc(30px + var(--safe-bottom));
+        }
+        .mobile-drawer.open {
+            transform: translateX(310px);
+        }
+        .drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .drawer-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #94a3b8;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .drawer-close-btn:hover { color: white; background: rgba(255, 255, 255, 0.2); }
+        .drawer-user-card {
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .drawer-links {
+            padding: 14px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .drawer-item i { width: 22px; font-size: 1.1rem; color: var(--primary); text-align: center; }
+        .drawer-item:hover, .drawer-item.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary);
+        }
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- MOBILE BOTTOM NAVIGATION BAR --- */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: calc(62px + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            z-index: 1200;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+        }
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: #94a3b8;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 6px 0;
+            transition: var(--transition);
+            position: relative;
+            user-select: none;
+        }
+        .bottom-nav-item i {
+            font-size: 1.25rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .bottom-nav-item.active {
+            color: var(--primary);
+        }
+        .bottom-nav-item.active i {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 0 6px var(--primary-glow));
+        }
+        .bottom-nav-item:active {
+            transform: scale(0.92);
+        }
+        .bottom-nav-doctor-badge {
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--accent-glow);
+            margin-top: -14px;
+            border: 2px solid #0f172a;
+        }
+        .bottom-nav-doctor-badge i { font-size: 1.15rem; color: white !important; }
+
+        /* --- PAGES LAYOUT --- */
+        .page {
+            display: none;
+            padding: 24px 5% 80px 5%;
+            animation: slideUp 0.35s ease-out;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .active-page { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HERO SECTION --- */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.95), rgba(15, 23, 42, 0.92)), url('https://images.unsplash.com/photo-1625246333195-581962374a1b?auto=format&fit=crop&w=1920&q=80') center/cover;
+            border-radius: var(--radius-lg);
+            color: white;
+            padding: 50px 36px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(6, 78, 59, 0.2);
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.25), transparent 70%);
+            pointer-events: none;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 32px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .hero-title {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 800;
+            line-height: 1.18;
+            margin-bottom: 14px;
+        }
+        .hero-title span {
+            background: linear-gradient(135deg, #34d399, #fcd34d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle {
+            font-size: clamp(0.92rem, 1.8vw, 1.1rem);
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            max-width: 580px;
+            line-height: 1.5;
+        }
+        .hero-cta-group { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        /* Weather Card in Hero */
+        .weather-glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            transition: var(--transition);
+        }
+        .weather-glass-card:hover { transform: translateY(-3px); border-color: rgba(16, 185, 129, 0.4); }
+        .weather-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .weather-temp-row { display: flex; align-items: center; gap: 16px; }
+        .weather-big-icon { font-size: 2.6rem; color: #fcd34d; filter: drop-shadow(0 0 10px rgba(252, 211, 77, 0.4)); flex-shrink: 0; }
+        .weather-temp { font-size: 2.3rem; font-weight: 800; line-height: 1; }
+        .weather-chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+        .weather-chip {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- STATS GRID --- */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+        .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); line-height: 1.1; }
+        .stat-lbl { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+        /* --- CARDS & GRIDS --- */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .card:hover { box-shadow: var(--shadow-md); }
+
+        .card-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .card-title {
+            font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- MARKETPLACE (DIGITAL MANDI) --- */
+        .market-toolbar {
+            background: white;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 25px;
+            flex: 1;
+            min-width: 220px;
+            max-width: 420px;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+        .search-box:focus-within { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px var(--primary-glow); }
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .category-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+        .cat-pill {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            border: none;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .cat-pill.active, .cat-pill:hover { background: var(--primary); color: white; }
+
+        .product-card {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(16, 185, 129, 0.4); }
+        .product-img-wrap { position: relative; height: 180px; overflow: hidden; background: #e2e8f0; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .product-card:hover .product-img { transform: scale(1.06); }
+        .cat-badge {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            color: #34d399;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        .delete-crop-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .delete-crop-btn:hover { transform: scale(1.1); background: #dc2626; }
+
+        .product-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        .product-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; color: var(--text-dark); }
+        .product-desc { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-meta { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; flex-wrap: wrap; gap: 4px; }
+        .product-phone-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #059669;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            background: #ecfdf5;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+        .product-price-bar {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .price-text { font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); }
+        .price-text span { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); }
+
+        /* --- AI CROP DOCTOR --- */
+        .doctor-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        .scan-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius-lg);
+            padding: 32px 18px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .scan-box:hover, .scan-box:active { border-color: var(--primary); background: #f0fdf4; }
+        .scan-line {
+            position: absolute;
+            left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, transparent, #10b981, #34d399, transparent);
+            box-shadow: 0 0 15px #10b981;
+            display: none;
+            z-index: 10;
+        }
+        .scan-box.scanning .scan-line {
+            display: block;
+            animation: scanAnim 2s infinite linear;
+        }
+        @keyframes scanAnim {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        .doctor-action-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .diagnosis-result-card {
+            display: none;
+            margin-top: 24px;
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            border: 2px solid #bbf7d0;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+        }
+        .confidence-meter {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            transition: width 1s ease;
+        }
+
+        /* --- MAP SECTION --- */
+        #map-container {
+            height: 500px;
+            border-radius: var(--radius-md);
+            z-index: 1;
+            width: 100%;
+        }
+        .map-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .map-legend-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        /* --- ORDER TRACKER --- */
+        .order-card {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .order-timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 22px;
+            padding: 0 10px;
+        }
+        .order-timeline::before {
+            content: '';
+            position: absolute;
+            top: 16px; left: 30px; right: 30px;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+        .timeline-step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+            max-width: 110px;
+        }
+        .timeline-icon {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 6px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .timeline-step.active .timeline-icon {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .timeline-step.completed .timeline-icon {
+            background: var(--primary-dark);
+            color: white;
+        }
+        .timeline-label { font-size: 0.75rem; font-weight: 600; color: var(--text-dark); }
+        .timeline-time { font-size: 0.68rem; color: var(--text-muted); }
+
+        /* --- MODALS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+        .modal-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        .close-btn {
+            position: absolute;
+            top: 18px; right: 18px;
+            background: #f1f5f9;
+            border: none;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .close-btn:hover { background: #fee2e2; color: var(--danger); }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text-dark); }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 16px; /* Prevents iOS auto-zoom */
+            outline: none;
+            transition: var(--transition);
+            background: #ffffff;
+        }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+
+        .auth-switch {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 9px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .auth-tab.active {
+            background: white;
+            color: var(--primary-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* --- FLOATING VOICE ASSISTANT --- */
+        .voice-float-btn {
+            position: fixed;
+            bottom: 28px; right: 28px;
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 25px var(--primary-glow);
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            touch-action: manipulation;
+        }
+        .voice-float-btn:hover { transform: scale(1.08) rotate(5deg); }
+        .voice-float-btn:active { transform: scale(0.95); }
+        .voice-float-btn.listening {
+            animation: pulseWave 1.2s infinite;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        @keyframes pulseWave {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast {
+            visibility: hidden;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.15);
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 90vw;
+            text-align: center;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 36px 5% calc(36px + var(--safe-bottom));
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.88rem;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 24px;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.78rem;
+        }
+
+        /* ===================================================
+           MOBILE & RESPONSIVE BREAKPOINTS (APP-EFFICIENCY)
+           =================================================== */
+        @media (max-width: 820px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: inline-flex; }
+            .mobile-bottom-nav { display: flex; }
+            .user-badge-pill { display: none !important; } /* Clean navbar, user pill moved to drawer */
+            .page { padding-bottom: calc(90px + var(--safe-bottom)); }
+            .voice-float-btn {
+                bottom: calc(75px + var(--safe-bottom));
+                right: 18px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+            #toast {
+                bottom: calc(82px + var(--safe-bottom));
+            }
+            .hero-grid { grid-template-columns: 1fr; gap: 20px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+            #map-container { height: 360px; }
+        }
+
+        @media (max-width: 640px) {
+            .navbar { padding: 0.65rem 4%; }
+            .top-ticker {
+                font-size: 0.72rem;
+                padding: 5px 4%;
+            }
+            .top-ticker .ticker-items span:nth-child(2),
+            .top-ticker .ticker-items span:nth-child(3) {
+                display: none; /* Keep ticker ultra-compact on phone screens */
+            }
+
+            .hero-banner {
+                padding: 28px 18px;
+                border-radius: var(--radius-md);
+                margin-bottom: 20px;
+            }
+            .hero-title { font-size: 1.75rem; margin-bottom: 10px; }
+            .hero-subtitle { font-size: 0.9rem; margin-bottom: 18px; }
+            .hero-cta-group .btn { width: 100%; }
+
+            /* Stats Strip into 2 columns on Mobile */
+            .stats-strip {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 24px;
+            }
+            .stat-card {
+                padding: 12px 14px;
+                gap: 10px;
+            }
+            .stat-icon {
+                width: 38px; height: 38px;
+                font-size: 1.1rem;
+                border-radius: 10px;
+            }
+            .stat-val { font-size: 1.35rem; }
+            .stat-lbl { font-size: 0.72rem; }
+
+            /* Grid 3 into 1 column on mobile */
+            .grid-3 {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .market-toolbar {
+                padding: 12px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                max-width: 100%;
+            }
+
+            /* Responsive Modals as Mobile Bottom-Sheets */
+            .modal-overlay {
+                align-items: flex-end;
+                padding: 0;
+            }
+            .modal-card {
+                border-radius: 20px 20px 0 0;
+                max-height: 85vh;
+                padding: 24px 18px calc(24px + var(--safe-bottom)) 18px;
+                animation: slideUpModal 0.28s ease-out;
+            }
+            @keyframes slideUpModal {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+
+            /* Diagnosis remedies stack on mobile */
+            #diagnosis-result .remedy-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+            }
+
+            /* Mobile Adaptive Timeline */
+            .order-timeline {
+                flex-direction: column;
+                gap: 16px;
+                padding: 0;
+            }
+            .order-timeline::before {
+                top: 15px; bottom: 15px; left: 16px; right: auto;
+                width: 3px; height: auto;
+            }
+            .timeline-step {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                max-width: 100%;
+                text-align: left;
+            }
+            .timeline-icon {
+                margin: 0;
+                flex-shrink: 0;
+            }
+
+            .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP TICKER BAR -->
+    <div class="top-ticker">
+        <div class="ticker-items">
+            <span><i class="fa-solid fa-wheat-awn"></i> Mandi: <span class="ticker-highlight">NIFTY AGRI ▲ 1.4%</span></span>
+            <span>• 0% Commission Direct Farmer Trading</span>
+            <span>• Verified APMC Mandi Data</span>
+        </div>
+        <div>
+            <a href="tel:18001801551" class="ticker-helpline ticker-highlight">
+                <i class="fa-solid fa-phone-volume"></i> <span>1800-180-1551</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <!-- Mobile Menu Hamburger Button -->
+            <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="openDrawer()" aria-label="Open Navigation Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Brand Logo -->
+            <div class="logo" onclick="nav('home')">
+                <i class="fa-solid fa-seedling"></i>
+                <div>Agro<span>India</span></div>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation Links -->
+        <div class="nav-links">
+            <span class="nav-item active" id="nav-btn-home" onclick="nav('home')"><i class="fa-solid fa-house"></i> <span data-lang="nav_home">Home</span></span>
+            <span class="nav-item" id="nav-btn-products" onclick="nav('products')"><i class="fa-solid fa-store"></i> <span data-lang="nav_market">Digital Mandi</span></span>
+            <span class="nav-item" id="nav-btn-ai-doctor" onclick="nav('ai-doctor')"><i class="fa-solid fa-stethoscope"></i> <span data-lang="nav_ai">AI Crop Doctor</span></span>
+            <span class="nav-item" id="nav-btn-map" onclick="nav('map')"><i class="fa-solid fa-map-location-dot"></i> <span data-lang="nav_map">Live Map</span></span>
+            <span class="nav-item" id="nav-btn-insights" onclick="nav('insights')"><i class="fa-solid fa-chart-line"></i> <span data-lang="nav_insights">Market Intelligence</span></span>
+            <span class="nav-item" id="nav-btn-tracker" onclick="nav('tracker')" style="display:none;"><i class="fa-solid fa-truck-fast"></i> <span data-lang="nav_orders">My Orders</span></span>
+        </div>
+
+        <div class="nav-actions">
+            <!-- Language Toggle Button -->
+            <button class="lang-btn" onclick="toggleLang()" title="Switch Language">
+                <i class="fa-solid fa-globe"></i> <span id="lang-label">English / हिंदी</span>
+            </button>
+
+            <!-- Cart Icon (for Buyers) -->
+            <div class="cart-icon-container" id="nav-cart" onclick="openCartModal()" title="View Cart">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <div class="cart-badge" id="cart-count">0</div>
+            </div>
+
+            <!-- Desktop Logged Out Button -->
+            <button class="btn btn-sm" onclick="openAuthModal()" id="auth-btn">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> <span data-lang="btn_login">Login / Join</span>
+            </button>
+
+            <!-- Desktop User Profile Pill (When Logged in) -->
+            <div class="user-badge-pill" id="user-profile">
+                <div class="user-avatar" id="user-avatar-initial">K</div>
+                <div style="line-height: 1.2;">
+                    <div style="font-weight: 700; font-size: 0.82rem;" id="user-name-display">Farmer Ji</div>
+                    <div class="user-role-tag" id="user-role-display">Farmer</div>
+                </div>
+                <!-- Instant Role Switch Button -->
+                <button class="btn btn-sm btn-outline" style="padding: 3px 9px; font-size: 0.72rem; border-radius: 14px; color: #34d399; border-color: rgba(52, 211, 153, 0.4); margin-left: 2px;" onclick="toggleUserRole()" id="role-switch-btn" title="Click to switch role without logging out">
+                    <i class="fa-solid fa-repeat"></i> <span id="switch-role-text">Switch to Buyer</span>
+                </button>
+                <button class="btn btn-sm btn-danger" style="margin-left:4px; padding: 4px 8px;" onclick="handleLogout()" title="Logout">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE SLIDE-OVER DRAWER -->
+    <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+    <aside class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="logo" onclick="nav('home'); closeDrawer();">
+                <i class="fa-solid fa-seedling"></i>
+                <div>Agro<span>India</span></div>
+            </div>
+            <button class="drawer-close-btn" onclick="closeDrawer()" aria-label="Close menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Drawer User Card (Dynamic) -->
+        <div class="drawer-user-card" id="drawer-user-card">
+            <!-- Logged out view -->
+            <div id="drawer-logged-out" style="display:flex; flex-direction:column; gap:10px;">
+                <p style="font-size:0.85rem; color:#94a3b8;">Join AgroIndia for 0% commission mandi and AI diagnostics.</p>
+                <button class="btn btn-sm" style="width:100%;" onclick="closeDrawer(); openAuthModal();">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> <span data-lang="btn_login">Login / Register</span>
+                </button>
+            </div>
+            <!-- Logged in view -->
+            <div id="drawer-logged-in" style="display:none; flex-direction:column; gap:10px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="user-avatar" id="drawer-avatar-initial" style="width:38px; height:38px; font-size:1rem;">K</div>
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;" id="drawer-user-name">Farmer Ji</div>
+                        <div class="user-role-tag" id="drawer-user-role" style="display:inline-block; margin-top:2px;">Farmer</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:4px;">
+                    <button class="btn btn-sm btn-outline" style="flex:1; font-size:0.75rem; padding:6px;" onclick="toggleUserRole()">
+                        <i class="fa-solid fa-repeat"></i> <span id="drawer-switch-text">Switch to Buyer</span>
+                    </button>
+                    <button class="btn btn-sm btn-danger" style="padding:6px 12px;" onclick="handleLogout()">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation items in Drawer -->
+        <div class="drawer-links">
+            <a class="drawer-item active" id="drawer-btn-home" onclick="nav('home'); closeDrawer();"><i class="fa-solid fa-house"></i> <span data-lang="nav_home">Home</span></a>
+            <a class="drawer-item" id="drawer-btn-products" onclick="nav('products'); closeDrawer();"><i class="fa-solid fa-store"></i> <span data-lang="nav_market">Digital Mandi</span></a>
+            <a class="drawer-item" id="drawer-btn-ai-doctor" onclick="nav('ai-doctor'); closeDrawer();"><i class="fa-solid fa-stethoscope"></i> <span data-lang="nav_ai">AI Crop Doctor</span></a>
+            <a class="drawer-item" id="drawer-btn-map" onclick="nav('map'); closeDrawer();"><i class="fa-solid fa-map-location-dot"></i> <span data-lang="nav_map">Live Map</span></a>
+            <a class="drawer-item" id="drawer-btn-insights" onclick="nav('insights'); closeDrawer();"><i class="fa-solid fa-chart-line"></i> <span data-lang="nav_insights">Market Intelligence</span></a>
+            <a class="drawer-item" id="drawer-btn-tracker" onclick="nav('tracker'); closeDrawer();"><i class="fa-solid fa-truck-fast"></i> <span data-lang="nav_orders">My Orders</span></a>
+        </div>
+
+        <!-- Drawer Footer with Helpline and Language -->
+        <div class="drawer-footer">
+            <a href="tel:18001801551" class="btn btn-outline" style="width:100%; border-color:#34d399; color:#34d399; font-size:0.85rem; padding:8px 12px;">
+                <i class="fa-solid fa-phone-volume"></i> <span>Kisan Helpline (1800-180-1551)</span>
+            </a>
+            <button class="lang-btn" style="width:100%; justify-content:center; padding:8px;" onclick="toggleLang()">
+                <i class="fa-solid fa-globe"></i> <span id="drawer-lang-label">English / हिंदी</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MOBILE STICKY BOTTOM NAVIGATION BAR -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+        <div class="bottom-nav-item active" id="bnav-home" onclick="nav('home')">
+            <i class="fa-solid fa-house"></i>
+            <span data-lang="nav_home">Home</span>
+        </div>
+        <div class="bottom-nav-item" id="bnav-products" onclick="nav('products')">
+            <i class="fa-solid fa-store"></i>
+            <span data-lang="nav_market">Mandi</span>
+        </div>
+        <div class="bottom-nav-item" id="bnav-ai-doctor" onclick="nav('ai-doctor')">
+            <div class="bottom-nav-doctor-badge">
+                <i class="fa-solid fa-stethoscope"></i>
+            </div>
+            <span data-lang="nav_ai" style="margin-top:2px;">AI Doctor</span>
+        </div>
+        <div class="bottom-nav-item" id="bnav-map" onclick="nav('map')">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span data-lang="nav_map">Map</span>
+        </div>
+        <div class="bottom-nav-item" id="bnav-tracker" onclick="nav('tracker')">
+            <i class="fa-solid fa-truck-fast"></i>
+            <span data-lang="nav_orders">Orders</span>
+        </div>
+    </nav>
+
+    <!-- FLOATING VOICE ASSISTANT -->
+    <button class="voice-float-btn" id="voice-btn" onclick="startVoiceAssist()" title="Voice Command (Boliye)">
+        <i class="fa-solid fa-microphone"></i>
+    </button>
+
+    <!-- ==================== 1. HOME PAGE ==================== -->
+    <div id="home" class="page active-page">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <div class="hero-grid">
+                <div>
+                    <h1 class="hero-title" data-lang="hero_title">Smart Technology for <span>Indian Farmers</span></h1>
+                    <p class="hero-subtitle" data-lang="hero_desc">Direct 0% commission Digital Mandi, Deep-Learning AI crop disease diagnosis, satellite geospatial mapping, and predictive price forecasting.</p>
+                    <div class="hero-cta-group">
+                        <button class="btn" onclick="nav('products')">
+                            <i class="fa-solid fa-store"></i> <span data-lang="hero_btn_market">Explore Mandi</span>
+                        </button>
+                        <button class="btn btn-outline" style="border-color:white; color:white;" onclick="nav('ai-doctor')">
+                            <i class="fa-solid fa-camera"></i> <span data-lang="hero_btn_doctor">Scan Crop Disease</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Real Weather Glass Card -->
+                <div>
+                    <div class="weather-glass-card">
+                        <div class="weather-header">
+                            <div>
+                                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color:#34d399;"><i class="fa-solid fa-location-dot"></i> Live Weather</span>
+                                <div style="font-weight: 700; font-size: 1.05rem;" id="weather-loc-text">New Delhi, India</div>
+                            </div>
+                            <span class="weather-chip" id="weather-condition-tag">Clear Sky</span>
+                        </div>
+                        <div class="weather-temp-row">
+                            <div class="weather-big-icon"><i class="fa-solid fa-cloud-sun" id="weather-icon-el"></i></div>
+                            <div>
+                                <div class="weather-temp" id="weather-temp-val">28°C</div>
+                                <div style="font-size: 0.85rem; color: #cbd5e1;" id="weather-desc-val">Optimal for Harvesting</div>
+                            </div>
+                        </div>
+                        <div class="weather-chips">
+                            <div class="weather-chip"><i class="fa-solid fa-droplet"></i> Humidity: <span id="weather-humidity">58%</span></div>
+                            <div class="weather-chip"><i class="fa-solid fa-wind"></i> Wind: <span id="weather-wind">12 km/h</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Metrics / Stats Strip -->
+        <div class="stats-strip">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#ecfdf5; color:var(--primary);"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-farmers">0</div>
+                    <div class="stat-lbl" data-lang="stat_farmers">Registered Users</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef3c7; color:var(--accent);"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-products">0</div>
+                    <div class="stat-lbl" data-lang="stat_products">Live Crop Listings</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#eff6ff; color:var(--info);"><i class="fa-solid fa-truck-fast"></i></div>
+                <div>
+                    <div class="stat-val" id="stat-orders">0</div>
+                    <div class="stat-lbl">Total Orders Placed</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fdf2f8; color:#db2777;"><i class="fa-solid fa-percent"></i></div>
+                <div>
+                    <div class="stat-val">0%</div>
+                    <div class="stat-lbl" data-lang="stat_commission">Middleman Commission</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Feature Highlights -->
+        <div class="grid-3" style="margin-bottom: 30px;">
+            <div class="card" style="border-top: 4px solid var(--primary);">
+                <i class="fa-solid fa-scale-balanced fa-2x" style="color:var(--primary); margin-bottom: 12px;"></i>
+                <h3 style="margin-bottom: 6px; font-size:1.15rem;" data-lang="card1_title">Zero Commission Trading</h3>
+                <p style="color:var(--text-muted); font-size: 0.88rem;" data-lang="card1_desc">Direct farmer-to-consumer and B2B wholesale marketplace ensuring maximum profit for producers and fair prices for buyers.</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--accent);">
+                <i class="fa-solid fa-microchip fa-2x" style="color:var(--accent); margin-bottom: 12px;"></i>
+                <h3 style="margin-bottom: 6px; font-size:1.15rem;" data-lang="card2_title">AI Leaf Disease Scanner</h3>
+                <p style="color:var(--text-muted); font-size: 0.88rem;" data-lang="card2_desc">Instant deep learning visual diagnosis for foliar diseases with organic bio-remedies and chemical spray recommendations.</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--info);">
+                <i class="fa-solid fa-chart-pie fa-2x" style="color:var(--info); margin-bottom: 12px;"></i>
+                <h3 style="margin-bottom: 6px; font-size:1.15rem;" data-lang="card3_title">Mandi Price Forecasting</h3>
+                <p style="color:var(--text-muted); font-size: 0.88rem;" data-lang="card3_desc">Data-driven rate predictions and crop estimators to help farmers decide the optimal time to harvest, store, or sell produce.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. DIGITAL MANDI (MARKETPLACE) ==================== -->
+    <div id="products" class="page">
+        <div class="card-header-bar">
+            <div>
+                <h2 class="card-title"><i class="fa-solid fa-store" style="color:var(--primary);"></i> <span data-lang="market_title">Digital Mandi (Live Produce)</span></h2>
+                <p style="color:var(--text-muted); font-size:0.85rem;" data-lang="market_subtitle">Fresh farm produce directly from verified Indian cultivators.</p>
+            </div>
+            <div>
+                <button class="btn" onclick="openSellModal()">
+                    <i class="fa-solid fa-circle-plus"></i> <span data-lang="btn_sell_produce">Sell Your Produce</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar: Search & Category Pills -->
+        <div class="market-toolbar">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted);"></i>
+                <input type="text" id="market-search-input" placeholder="Search Wheat, Rice, Apple, Nashik..." oninput="handleMarketSearch()">
+            </div>
+
+            <div class="category-pills no-scrollbar">
+                <button class="cat-pill active" onclick="filterCategory('all', this)">All Crops</button>
+                <button class="cat-pill" onclick="filterCategory('Cereals', this)">Cereals & Grains</button>
+                <button class="cat-pill" onclick="filterCategory('Vegetables', this)">Vegetables</button>
+                <button class="cat-pill" onclick="filterCategory('Fruits', this)">Fruits</button>
+                <button class="cat-pill" onclick="filterCategory('Spices', this)">Spices</button>
+                <button class="cat-pill" onclick="filterCategory('Cash Crops', this)">Cash Crops</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Product Cards Grid -->
+        <div class="grid-3" id="product-grid">
+            <!-- 100% User Added Products from Database -->
+        </div>
+    </div>
+
+    <!-- ==================== 3. AI CROP DOCTOR ==================== -->
+    <div id="ai-doctor" class="page">
+        <div class="doctor-container">
+            <div class="card" style="text-align: center; border-top: 4px solid var(--accent);">
+                <div style="display:inline-flex; align-items:center; justify-content:center; width:58px; height:58px; border-radius:50%; background:#fef3c7; color:var(--accent); font-size:1.8rem; margin-bottom:12px;">
+                    <i class="fa-solid fa-stethoscope"></i>
+                </div>
+                <h2 style="margin-bottom: 6px; font-size:clamp(1.2rem, 3vw, 1.5rem);" data-lang="doctor_title">AI Crop Disease Doctor & Diagnostic Lab</h2>
+                <p style="color:var(--text-muted); max-width:620px; margin: 0 auto 20px; font-size:0.88rem;" data-lang="doctor_subtitle">Upload or snap a photo of an infected leaf. Our Deep Learning vision model will diagnose the pathogen, measure severity, and prescribe treatment.</p>
+
+                <!-- Crop Selection Form -->
+                <div style="max-width: 400px; margin: 0 auto 16px; text-align: left;">
+                    <label style="font-weight: 600; font-size: 0.88rem; margin-bottom: 5px; display: block;">Select Target Crop:</label>
+                    <select id="doctor-crop-select" class="form-control">
+                        <option value="Wheat">Wheat (गेहूं)</option>
+                        <option value="Rice">Rice / Paddy (धान / चावल)</option>
+                        <option value="Tomato">Tomato (टमाटर)</option>
+                        <option value="Potato">Potato (आलू)</option>
+                        <option value="Cotton">Cotton (कपास)</option>
+                    </select>
+                </div>
+
+                <!-- Interactive Upload / Drag Drop Box -->
+                <div class="scan-box" id="drop-zone" onclick="document.getElementById('leaf-file-input').click()">
+                    <div class="scan-line"></div>
+                    <i class="fa-solid fa-cloud-arrow-up fa-3x" style="color: #94a3b8; margin-bottom: 10px;"></i>
+                    <h4 style="color:var(--text-dark); margin-bottom: 4px; font-size:1rem;" data-lang="drop_title">Click to Upload or Drag Leaf Image</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Supports PNG, JPG, JPEG (Max 10MB)</p>
+                    
+                    <!-- File Inputs (Standard + Direct Mobile Camera) -->
+                    <input type="file" id="leaf-file-input" hidden accept="image/*" onchange="handleLeafScan(event)">
+                    <input type="file" id="leaf-camera-input" hidden accept="image/*" capture="environment" onchange="handleLeafScan(event)">
+                    
+                    <img id="leaf-preview" style="display:none; max-height:200px; border-radius:12px; margin: 12px auto 0; box-shadow: var(--shadow-md);" alt="Leaf preview">
+                </div>
+
+                <!-- Quick Mobile Action Buttons for Camera & Gallery -->
+                <div class="doctor-action-btns">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="event.stopPropagation(); document.getElementById('leaf-camera-input').click();">
+                        <i class="fa-solid fa-camera"></i> Snap with Camera
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="event.stopPropagation(); document.getElementById('leaf-file-input').click();">
+                        <i class="fa-solid fa-image"></i> Select from Gallery
+                    </button>
+                </div>
+
+                <!-- Loading Bar -->
+                <div id="doctor-loader" style="display:none; margin-top:20px;">
+                    <div style="font-weight:600; color:var(--primary-dark); margin-bottom:8px; font-size:0.9rem;"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing leaf tissue patterns with Deep Learning...</div>
+                    <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                        <div id="doctor-progress" style="width:0%; height:100%; background:linear-gradient(90deg, var(--accent), var(--primary)); transition:width 2s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- Diagnosis Output Card -->
+                <div id="diagnosis-result" class="diagnosis-result-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                        <div style="text-align:left;">
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--primary-dark); text-transform:uppercase;"><i class="fa-solid fa-circle-check"></i> Diagnostic Assessment</span>
+                            <h3 id="diag-disease-name" style="color:#0f172a; margin-top:2px; font-size:1.15rem;">Early Blight</h3>
+                        </div>
+                        <span id="diag-severity-badge" style="background:#fee2e2; color:#dc2626; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:20px;">Severity: High</span>
+                    </div>
+
+                    <div style="text-align:left; margin-bottom:14px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:600;">
+                            <span>Confidence Level</span>
+                            <span id="diag-confidence-text" style="color:var(--primary-dark);">96.4%</span>
+                        </div>
+                        <div class="confidence-meter">
+                            <div class="confidence-fill" id="diag-confidence-bar" style="width:96.4%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2 remedy-grid" style="text-align:left; gap:12px;">
+                        <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:10px;">
+                            <h4 style="color:#15803d; font-size:0.88rem; margin-bottom:4px;"><i class="fa-solid fa-flask"></i> Chemical Remedy</h4>
+                            <p id="diag-chemical-text" style="font-size:0.82rem; color:#166534; line-height:1.4;">Spray Mancozeb 75% WP @ 2g/L of water.</p>
+                        </div>
+                        <div style="background:#fefce8; border:1px solid #fef08a; padding:12px; border-radius:10px;">
+                            <h4 style="color:#a16207; font-size:0.88rem; margin-bottom:4px;"><i class="fa-solid fa-leaf"></i> Organic / Bio Control</h4>
+                            <p id="diag-organic-text" style="font-size:0.82rem; color:#854d0e; line-height:1.4;">Foliar spray with 5% Neem Seed Kernel Extract.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 4. LIVE MAP ==================== -->
+    <div id="map" class="page">
+        <div class="card-header-bar">
+            <div>
+                <h2 class="card-title"><i class="fa-solid fa-map-location-dot" style="color:var(--info);"></i> <span data-lang="map_title">Live Mandi & Infrastructure Locator</span></h2>
+                <p style="color:var(--text-muted); font-size:0.85rem;" data-lang="map_subtitle">Interactive GIS mapping of APMC Government Mandis, Cold Storage warehouses, and verified agricultural farms.</p>
+            </div>
+            <div class="map-filters no-scrollbar">
+                <button class="cat-pill active" onclick="filterMapMarkers('all', this)">All Infrastructure</button>
+                <button class="cat-pill" onclick="filterMapMarkers('mandi', this)"><span class="map-legend-dot" style="background:#3b82f6;"></span> Mandis</button>
+                <button class="cat-pill" onclick="filterMapMarkers('storage', this)"><span class="map-legend-dot" style="background:#ef4444;"></span> Cold Storages</button>
+                <button class="cat-pill" onclick="filterMapMarkers('farm', this)"><span class="map-legend-dot" style="background:#10b981;"></span> Farms</button>
+            </div>
+        </div>
+
+        <div class="card" style="padding:8px;">
+            <div id="map-container"></div>
+        </div>
+    </div>
+
+    <!-- ==================== 5. MARKET INTELLIGENCE & ANALYTICS ==================== -->
+    <div id="insights" class="page">
+        <div class="card-header-bar">
+            <div>
+                <h2 class="card-title"><i class="fa-solid fa-chart-line" style="color:var(--primary);"></i> <span data-lang="insights_title">Market Intelligence & Predictive Analytics</span></h2>
+                <p style="color:var(--text-muted); font-size:0.85rem;">Historical commodity prices, real-time MSP benchmarking, and AI harvest timing advice.</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Chart Card -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                    <h3 style="font-size:1.05rem; font-weight:700;"><i class="fa-solid fa-arrow-trend-up"></i> Price Trend Analysis (₹/Qtl)</h3>
+                    <select id="chart-crop-picker" class="form-control" style="width:auto; padding:4px 10px; font-size:0.85rem;" onchange="updateChartData(this.value)">
+                        <option value="Wheat">Wheat</option>
+                        <option value="Rice">Basmati Rice</option>
+                        <option value="Onion">Onion</option>
+                        <option value="Potato">Potato</option>
+                        <option value="Cotton">Cotton</option>
+                    </select>
+                </div>
+                <div style="height: 280px; position:relative;">
+                    <canvas id="priceTrendCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Price Estimator Card -->
+            <div class="card">
+                <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:14px;"><i class="fa-solid fa-calculator" style="color:var(--accent);"></i> Real-Time Rate & Profit Estimator</h3>
+                <form onsubmit="handlePriceEstimation(event)">
+                    <div class="form-group">
+                        <label>Select Crop Commodity:</label>
+                        <select id="calc-crop" class="form-control" required>
+                            <option value="Wheat">Sharbati Wheat</option>
+                            <option value="Rice">Basmati Rice</option>
+                            <option value="Onion">Nashik Onion</option>
+                            <option value="Potato">Agra Potato</option>
+                            <option value="Cotton">Gujarat Cotton</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Expected Quantity (Quintals / 100 Kg):</label>
+                        <input type="number" id="calc-qty" class="form-control" value="10" min="1" required>
+                    </div>
+                    <button type="submit" class="btn" style="width:100%;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Calculate Projected Return
+                    </button>
+                </form>
+
+                <div id="calc-result" style="display:none; margin-top:16px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:#166534; font-weight:600; font-size:0.88rem;">Estimated Mandi Rate:</span>
+                        <strong id="calc-rate-val" style="color:var(--primary-dark); font-size:1.1rem;">₹2,450 / Qtl</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:#166534; font-weight:600; font-size:0.88rem;">Total Estimated Revenue:</span>
+                        <strong id="calc-revenue-val" style="color:#15803d; font-size:1.2rem;">₹24,500</strong>
+                    </div>
+                    <div style="font-size:0.78rem; color:#166534; border-top:1px solid #bbf7d0; padding-top:6px;">
+                        <i class="fa-solid fa-circle-info"></i> <strong>AI Insight:</strong> Strong wholesale demand. Recommended: <strong>Sell 70% now, hold 30% for next week.</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 6. ORDER TRACKER ==================== -->
+    <div id="tracker" class="page">
+        <div class="card-header-bar">
+            <div>
+                <h2 class="card-title"><i class="fa-solid fa-truck-fast" style="color:var(--primary);"></i> <span data-lang="tracker_title">My Orders & Consignment Tracker</span></h2>
+                <p style="color:var(--text-muted); font-size:0.85rem;">Track live progress of your crop deliveries from farm gate to your location.</p>
+            </div>
+        </div>
+
+        <div id="orders-list-container">
+            <!-- Dynamic orders from SQLite database -->
+        </div>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="close-btn" onclick="closeAuthModal()" aria-label="Close modal">&times;</button>
+            
+            <div class="auth-switch">
+                <div class="auth-tab active" id="tab-login" onclick="switchAuthMode('login')">Login</div>
+                <div class="auth-tab" id="tab-register" onclick="switchAuthMode('register')">New Registration</div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" onsubmit="handleLoginSubmit(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" class="form-control" required placeholder="farmer@example.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" class="form-control" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn" style="width:100%; margin-top:8px;">
+                    <i class="fa-solid fa-lock"></i> Secure Login
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" style="display:none;" onsubmit="handleRegisterSubmit(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" required placeholder="Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" class="form-control" required placeholder="ramesh@kisan.com">
+                </div>
+                <div class="form-group">
+                    <label>Account Role</label>
+                    <select id="reg-role" class="form-control">
+                        <option value="farmer">Farmer / Cultivator (किसान / विक्रेता)</option>
+                        <option value="buyer">Consumer / Wholesale Buyer (खरीदार)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location (State / City)</label>
+                    <input type="text" id="reg-location" class="form-control" placeholder="Punjab, India">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" class="form-control" required placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn" style="width:100%; margin-top:8px;">
+                    <i class="fa-solid fa-user-plus"></i> Complete Registration
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SELL PRODUCE MODAL -->
+    <div id="sell-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="close-btn" onclick="closeSellModal()" aria-label="Close modal">&times;</button>
+            <h3 style="margin-bottom:14px; color:var(--text-dark); font-size:1.15rem;"><i class="fa-solid fa-plus-circle" style="color:var(--primary);"></i> Sell Your Crop in Digital Mandi</h3>
+            
+            <form onsubmit="handleProductAdd(event)">
+                <div class="form-group">
+                    <label>Crop / Produce Name:</label>
+                    <input type="text" id="post-crop-name" class="form-control" required placeholder="e.g., Organic Sharbati Wheat">
+                </div>
+                <div class="grid-2" style="gap:10px;">
+                    <div class="form-group">
+                        <label>Category:</label>
+                        <select id="post-crop-cat" class="form-control">
+                            <option value="Cereals">Cereals & Grains</option>
+                            <option value="Vegetables">Vegetables</option>
+                            <option value="Fruits">Fruits</option>
+                            <option value="Spices">Spices</option>
+                            <option value="Cash Crops">Cash Crops</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹):</label>
+                        <input type="number" id="post-crop-price" class="form-control" required placeholder="45" step="0.5">
+                    </div>
+                </div>
+                <div class="grid-2" style="gap:10px;">
+                    <div class="form-group">
+                        <label>Unit:</label>
+                        <select id="post-crop-unit" class="form-control">
+                            <option value="Kg">Per Kg</option>
+                            <option value="Quintal">Per Quintal (100 Kg)</option>
+                            <option value="Dozen">Per Dozen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location (City, State):</label>
+                        <input type="text" id="post-crop-loc" class="form-control" required placeholder="e.g. Ludhiana, PB">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Contact Phone Number:</label>
+                    <input type="tel" id="post-crop-phone" class="form-control" required placeholder="+91 98765 43210">
+                </div>
+                <div class="form-group">
+                    <label>Description / Quality Details:</label>
+                    <input type="text" id="post-crop-desc" class="form-control" placeholder="100% natural, farm harvested yesterday...">
+                </div>
+                <div class="form-group">
+                    <label>Crop Photo (Upload):</label>
+                    <input type="file" id="post-crop-file" class="form-control" accept="image/*">
+                </div>
+                <button type="submit" class="btn" style="width:100%; margin-top:8px;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Publish Listing to Live Mandi
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- QUANTITY / ADD TO CART MODAL -->
+    <div id="buy-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="close-btn" onclick="closeBuyModal()" aria-label="Close modal">&times;</button>
+            <h3 id="buy-product-name" style="margin-bottom:4px; font-size:1.15rem;">Product Name</h3>
+            <p id="buy-product-price" style="color:var(--primary-dark); font-weight:700; font-size:1.15rem; margin-bottom:16px;">₹0 / Kg</p>
+            
+            <div class="form-group" style="text-align:center;">
+                <label style="font-size:0.95rem; margin-bottom:8px;">Select Quantity:</label>
+                <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:14px;">
+                    <button type="button" class="btn btn-outline" style="width:40px; height:40px; padding:0; border-radius:50%;" onclick="changeQty(-1)">-</button>
+                    <input type="number" id="buy-qty-input" value="1" min="1" class="form-control" style="width:90px; text-align:center; font-size:1.25rem; font-weight:700;" oninput="updateBuyTotal()">
+                    <button type="button" class="btn btn-outline" style="width:40px; height:40px; padding:0; border-radius:50%;" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:600; color:var(--text-muted);">Total Cost:</span>
+                <strong id="buy-total-price" style="font-size:1.35rem; color:var(--primary-dark);">₹0</strong>
+            </div>
+
+            <button type="button" class="btn" style="width:100%;" onclick="confirmAddToCart()">
+                <i class="fa-solid fa-cart-plus"></i> Add to Shopping Basket
+            </button>
+        </div>
+    </div>
+
+    <!-- CART & CHECKOUT MODAL -->
+    <div id="cart-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width:540px;">
+            <button class="close-btn" onclick="closeCartModal()" aria-label="Close modal">&times;</button>
+            <h3 style="margin-bottom:16px; font-size:1.15rem;"><i class="fa-solid fa-basket-shopping" style="color:var(--primary);"></i> Your Farm Basket</h3>
+            
+            <div id="cart-items-list" style="max-height:220px; overflow-y:auto; margin-bottom:16px;">
+                <!-- Cart Items Injected -->
+            </div>
+
+            <div style="border-top:1.5px solid #e2e8f0; padding-top:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <span style="font-size:1rem; font-weight:600;">Subtotal:</span>
+                <strong id="cart-subtotal" style="font-size:1.4rem; color:var(--primary-dark);">₹0</strong>
+            </div>
+
+            <!-- Delivery Details Form -->
+            <form onsubmit="handleOrderPlacement(event)">
+                <div class="form-group">
+                    <label>Delivery Address:</label>
+                    <input type="text" id="order-address" class="form-control" required placeholder="House No, Village/Sector, District, State">
+                </div>
+                <div class="grid-2" style="gap:10px;">
+                    <div class="form-group">
+                        <label>Pincode:</label>
+                        <input type="text" id="order-pincode" class="form-control" required placeholder="141001">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Mode:</label>
+                        <select id="order-payment" class="form-control">
+                            <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+                            <option value="Netbanking">Kisan Credit / NetBanking</option>
+                            <option value="COD">Cash on Farm Delivery</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn" style="width:100%;" id="place-order-btn">
+                    <i class="fa-solid fa-shield-halved"></i> Place Order & Confirm Delivery
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast"><i class="fa-solid fa-circle-check"></i> <span>Message</span></div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <div class="logo" style="margin-bottom:10px;">
+                    <i class="fa-solid fa-seedling"></i> Agro<span>India</span>
+                </div>
+                <p style="font-size:0.82rem; line-height:1.5; color:#94a3b8;">
+                    AgroIndia is dedicated to uplifting Indian agriculture through AI innovation, satellite mapping, direct market access, and transparent pricing.
+                </p>
+            </div>
+            <div>
+                <h4 style="color:white; margin-bottom:10px; font-size:0.95rem;">Platform</h4>
+                <p><a href="javascript:void(0)" onclick="nav('products')" style="color:#94a3b8; text-decoration:none;">Digital Mandi</a></p>
+                <p><a href="javascript:void(0)" onclick="nav('ai-doctor')" style="color:#94a3b8; text-decoration:none;">AI Crop Doctor</a></p>
+                <p><a href="javascript:void(0)" onclick="nav('map')" style="color:#94a3b8; text-decoration:none;">Live GIS Map</a></p>
+            </div>
+            <div>
+                <h4 style="color:white; margin-bottom:10px; font-size:0.95rem;">Resources</h4>
+                <p><a href="javascript:void(0)" onclick="nav('insights')" style="color:#94a3b8; text-decoration:none;">Market Insights</a></p>
+                <p><a href="javascript:void(0)" style="color:#94a3b8; text-decoration:none;">MSP Rates 2026</a></p>
+                <p><a href="javascript:void(0)" style="color:#94a3b8; text-decoration:none;">Kisan Schemes</a></p>
+            </div>
+            <div>
+                <h4 style="color:white; margin-bottom:10px; font-size:0.95rem;">Emergency</h4>
+                <p><a href="tel:18001801551" style="color:#34d399; font-weight:700; text-decoration:none;"><i class="fa-solid fa-phone"></i> 1800-180-1551</a></p>
+                <p style="font-size:0.75rem;">National Kisan Call Centre (Toll Free)</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 AgroIndia Platform. Built for Indian Farmers 🇮🇳. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // --- API BASE URL CONFIGURATION ---
+        // Dynamically detects if page is opened via Live Server (port != 5000) or file://, and routes to Flask at http://127.0.0.1:5000
+        const API_BASE = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '5000')) 
+            ? 'http://127.0.0.1:5000' 
+            : '';
+
+        // --- GLOBAL STATE ---
+        const state = {
+            lang: 'en',
+            user: JSON.parse(localStorage.getItem('agro_user')) || null,
+            products: [],
+            cart: JSON.parse(localStorage.getItem('agro_cart')) || [],
+            orders: [],
+            selectedBuyProduct: null,
+            currentCategory: 'all',
+            searchQuery: ''
+        };
+
+        const translations = {
+            en: {
+                nav_home: "Home", nav_market: "Digital Mandi", nav_ai: "AI Crop Doctor",
+                nav_map: "Live Map", nav_insights: "Market Intelligence", nav_orders: "My Orders",
+                hero_title: "Smart Technology for Indian Farmers",
+                hero_desc: "Direct 0% commission Digital Mandi, Deep-Learning AI crop disease diagnosis, satellite geospatial mapping, and predictive price forecasting.",
+                hero_btn_market: "Explore Mandi", hero_btn_doctor: "Scan Crop Disease",
+                btn_login: "Login / Join", btn_sell_produce: "Sell Your Produce",
+                market_title: "Digital Mandi (Live Produce)", market_subtitle: "Fresh farm produce directly from verified Indian cultivators.",
+                doctor_title: "AI Crop Disease Doctor & Diagnostic Lab", doctor_subtitle: "Upload or snap a photo of an infected leaf. Our Deep Learning vision model will diagnose the pathogen, measure severity, and prescribe treatment.",
+                drop_title: "Click to Upload or Drag Leaf Image",
+                map_title: "Live Mandi & Infrastructure Locator", map_subtitle: "Interactive GIS mapping of APMC Government Mandis, Cold Storage warehouses, and verified agricultural farms.",
+                insights_title: "Market Intelligence & Predictive Analytics", tracker_title: "My Orders & Consignment Tracker",
+                stat_farmers: "Registered Users", stat_products: "Live Crop Listings", stat_mandis: "APMC Mandis Mapped", stat_commission: "Middleman Commission"
+            },
+            hi: {
+                nav_home: "होम", nav_market: "डिजिटल मंडी", nav_ai: "फसल डॉक्टर",
+                nav_map: "नक्शा", nav_insights: "मंडी रिपोर्ट", nav_orders: "मेरे ऑर्डर्स",
+                hero_title: "भारतीय किसानों के लिए आधुनिक तकनीक",
+                hero_desc: "0% कमीशन डिजिटल मंडी, AI फसल रोग जांच, सैटेलाइट नक्शा और सटीक भाव अनुमान।",
+                hero_btn_market: "मंडी देखें", hero_btn_doctor: "रोग जांचें",
+                btn_login: "लॉगिन / जुड़ें", btn_sell_produce: "फसल बेचें",
+                market_title: "डिजिटल मंडी (ताज़ा फसलें)", market_subtitle: "सत्यापित किसानों द्वारा सीधे बेची जाने वाली ताज़ा फसलें।",
+                doctor_title: "AI फसल डॉक्टर एवं रोग जांच", doctor_subtitle: "संक्रमित पत्ते की फोटो अपलोड करें। हमारा AI मॉडल तुरंत बीमारी पहचान कर सही उपचार बताएगा।",
+                drop_title: "पत्ते की फोटो अपलोड करने के लिए क्लिक करें",
+                map_title: "लाइव मंडी एवं कोल्ड स्टोरेज नक्शा", map_subtitle: "नज़दीकी सरकारी APMC मंडियों, कोल्ड स्टोरेज और पंजीकृत फार्म्स का नक्शा।",
+                insights_title: "मंडी भाव एवं विश्लेषण", tracker_title: "मेरे ऑर्डर्स एवं डिलीवरी स्थिति",
+                stat_farmers: "पंजीकृत उपयोगकर्ता", stat_products: "लाइव फसलें", stat_mandis: "मंडियां जुड़ीं", stat_commission: "बिचौलिया कमीशन"
+            }
+        };
+
+        // --- MOBILE DRAWER HANDLERS ---
+        function openDrawer() {
+            document.getElementById('mobile-drawer').classList.add('open');
+            document.getElementById('drawer-backdrop').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDrawer() {
+            document.getElementById('mobile-drawer').classList.remove('open');
+            document.getElementById('drawer-backdrop').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // --- NAVIGATION ---
+        function nav(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.drawer-item').forEach(d => d.classList.remove('active'));
+            
+            const targetPage = document.getElementById(pageId);
+            const targetNav = document.getElementById(`nav-btn-${pageId}`);
+            const targetBnav = document.getElementById(`bnav-${pageId}`);
+            const targetDnav = document.getElementById(`drawer-btn-${pageId}`);
+            
+            if(targetPage) targetPage.classList.add('active-page');
+            if(targetNav) targetNav.classList.add('active');
+            if(targetBnav) targetBnav.classList.add('active');
+            if(targetDnav) targetDnav.classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if(pageId === 'home') fetchStats();
+            if(pageId === 'map') initMap();
+            if(pageId === 'insights') initCharts();
+            if(pageId === 'products') fetchProducts();
+            if(pageId === 'tracker') fetchOrders();
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(msg, icon = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3200);
+        }
+
+        // --- LANGUAGE SWITCHER ---
+        function toggleLang() {
+            state.lang = state.lang === 'en' ? 'hi' : 'en';
+            const dict = translations[state.lang];
+            for (const [key, val] of Object.entries(dict)) {
+                document.querySelectorAll(`[data-lang="${key}"]`).forEach(el => {
+                    el.textContent = val;
+                });
+            }
+            const labelText = state.lang === 'en' ? 'English / हिंदी' : 'हिंदी / English';
+            document.getElementById('lang-label').textContent = labelText;
+            const drawerLang = document.getElementById('drawer-lang-label');
+            if(drawerLang) drawerLang.textContent = labelText;
+            showToast(state.lang === 'en' ? 'Switched to English' : 'भाषा बदलकर हिंदी कर दी गई है।');
+        }
+
+        // --- STATS (REAL TIME FROM DATABASE) ---
+        let isFetchingStats = false;
+        async function fetchStats() {
+            if (isFetchingStats) return;
+            isFetchingStats = true;
+            try {
+                const res = await fetch(`${API_BASE}/stats`);
+                const data = await res.json();
+                if(data.success) {
+                    const elFarmers = document.getElementById('stat-farmers');
+                    const elProducts = document.getElementById('stat-products');
+                    const elOrders = document.getElementById('stat-orders');
+                    if(elFarmers) elFarmers.textContent = data.farmers_count;
+                    if(elProducts) elProducts.textContent = data.live_products;
+                    if(elOrders) elOrders.textContent = data.total_orders;
+                }
+            } catch (err) {
+                console.warn("Stats fetch error:", err);
+            } finally {
+                isFetchingStats = false;
+            }
+        }
+
+        // --- AUTH LOGIC (DATABASE CONNECTED) ---
+        function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
+        function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
+        
+        function switchAuthMode(mode) {
+            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+            document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    state.user = data.user;
+                    localStorage.setItem('agro_user', JSON.stringify(data.user));
+                    closeAuthModal();
+                    updateAuthUI();
+                    fetchStats();
+                    showToast(`Welcome back, ${data.user.fullName}!`);
+                } else {
+                    showToast(data.message || 'Login failed', 'fa-triangle-exclamation');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Server connection error', 'fa-circle-xmark');
+            }
+        }
+
+        async function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const full_name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const role = document.getElementById('reg-role').value;
+            const location = document.getElementById('reg-location').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ full_name, email, role, location, password })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    state.user = data.user;
+                    localStorage.setItem('agro_user', JSON.stringify(data.user));
+                    closeAuthModal();
+                    updateAuthUI();
+                    fetchStats();
+                    showToast(`Registration Successful! Welcome ${data.user.fullName}`);
+                } else {
+                    showToast(data.message || 'Registration failed', 'fa-triangle-exclamation');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Server connection error', 'fa-circle-xmark');
+            }
+        }
+
+        function handleLogout() {
+            state.user = null;
+            localStorage.removeItem('agro_user');
+            updateAuthUI();
+            closeDrawer();
+            nav('home');
+            showToast('Logged out successfully.');
+        }
+
+        async function toggleUserRole() {
+            if (!state.user) return;
+            const currentRole = (state.user.role || 'farmer').toLowerCase();
+            const newRole = currentRole === 'farmer' ? 'buyer' : 'farmer';
+
+            try {
+                const res = await fetch(`${API_BASE}/update_role`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: state.user.email, role: newRole })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    state.user.role = newRole;
+                    localStorage.setItem('agro_user', JSON.stringify(state.user));
+                    updateAuthUI();
+                    fetchProducts(); // Refresh delete buttons on products
+                    
+                    const roleLabel = newRole === 'farmer' ? 'Farmer / Seller (किसान)' : 'Buyer / Consumer (खरीदार)';
+                    showToast(`Role switched to ${roleLabel}!`, 'fa-repeat');
+                } else {
+                    showToast(data.message || 'Failed to switch role', 'fa-triangle-exclamation');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Server connection error', 'fa-circle-xmark');
+            }
+        }
+
+        function updateAuthUI() {
+            const authBtn = document.getElementById('auth-btn');
+            const userProfile = document.getElementById('user-profile');
+            const navTracker = document.getElementById('nav-btn-tracker');
+            const userRoleDisplay = document.getElementById('user-role-display');
+            const switchRoleText = document.getElementById('switch-role-text');
+
+            // Drawer elements
+            const drawerLoggedOut = document.getElementById('drawer-logged-out');
+            const drawerLoggedIn = document.getElementById('drawer-logged-in');
+            const drawerUserName = document.getElementById('drawer-user-name');
+            const drawerAvatar = document.getElementById('drawer-avatar-initial');
+            const drawerRole = document.getElementById('drawer-user-role');
+            const drawerSwitchText = document.getElementById('drawer-switch-text');
+            
+            if (state.user) {
+                if(authBtn) authBtn.style.display = 'none';
+                if(userProfile) userProfile.style.display = 'flex';
+                document.getElementById('user-name-display').textContent = state.user.fullName;
+                document.getElementById('user-avatar-initial').textContent = state.user.fullName.charAt(0).toUpperCase();
+                
+                const role = (state.user.role || 'farmer').toLowerCase();
+                const isFarmer = role === 'farmer';
+
+                userRoleDisplay.textContent = isFarmer ? '🌾 Farmer' : '🛒 Buyer';
+                userRoleDisplay.style.background = isFarmer ? 'rgba(16, 185, 129, 0.25)' : 'rgba(59, 130, 246, 0.25)';
+                userRoleDisplay.style.color = isFarmer ? '#34d399' : '#60a5fa';
+                if (switchRoleText) switchRoleText.textContent = isFarmer ? 'Switch to Buyer' : 'Switch to Farmer';
+                if (navTracker) navTracker.style.display = 'flex';
+
+                // Sync Drawer
+                if(drawerLoggedOut) drawerLoggedOut.style.display = 'none';
+                if(drawerLoggedIn) drawerLoggedIn.style.display = 'flex';
+                if(drawerUserName) drawerUserName.textContent = state.user.fullName;
+                if(drawerAvatar) drawerAvatar.textContent = state.user.fullName.charAt(0).toUpperCase();
+                if(drawerRole) {
+                    drawerRole.textContent = isFarmer ? '🌾 Farmer' : '🛒 Buyer';
+                    drawerRole.style.background = isFarmer ? 'rgba(16, 185, 129, 0.25)' : 'rgba(59, 130, 246, 0.25)';
+                    drawerRole.style.color = isFarmer ? '#34d399' : '#60a5fa';
+                }
+                if(drawerSwitchText) drawerSwitchText.textContent = isFarmer ? 'Switch to Buyer' : 'Switch to Farmer';
+            } else {
+                if(authBtn) authBtn.style.display = 'inline-flex';
+                if(userProfile) userProfile.style.display = 'none';
+                if(navTracker) navTracker.style.display = 'none';
+
+                // Sync Drawer
+                if(drawerLoggedOut) drawerLoggedOut.style.display = 'flex';
+                if(drawerLoggedIn) drawerLoggedIn.style.display = 'none';
+            }
+        }
+
+        // --- PRODUCTS (DIGITAL MANDI DATABASE FETCH) ---
+        let isFetchingProducts = false;
+        async function fetchProducts() {
+            if (isFetchingProducts) return;
+            isFetchingProducts = true;
+            try {
+                let url = `${API_BASE}/products?category=${encodeURIComponent(state.currentCategory)}`;
+                if(state.searchQuery) url += `&search=${encodeURIComponent(state.searchQuery)}`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                if(data.success) {
+                    state.products = data.products;
+                    renderProductsGrid();
+                }
+            } catch (err) {
+                console.error("Products fetch error:", err);
+            } finally {
+                isFetchingProducts = false;
+            }
+        }
+
+        function renderProductsGrid() {
+            const grid = document.getElementById('product-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+
+            if(state.products.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; padding: 50px 18px; background:white; border-radius:16px; border:2px dashed #cbd5e1;">
+                        <div style="width:64px; height:64px; border-radius:50%; background:#f0fdf4; color:var(--primary); display:inline-flex; align-items:center; justify-content:center; font-size:1.8rem; margin-bottom:14px;">
+                            <i class="fa-solid fa-seedling"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; color:var(--text-dark); margin-bottom:6px;">Digital Mandi is ready for fresh listings</h3>
+                        <p style="color:#64748b; max-width:450px; margin:0 auto 18px; font-size:0.88rem;">No crops listed yet. Be the first farmer to list your fresh farm produce with zero middleman commission!</p>
+                        <button class="btn" onclick="openSellModal()">
+                            <i class="fa-solid fa-plus-circle"></i> Sell Your Produce Now
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            state.products.forEach(p => {
+                const canDelete = state.user && (state.user.role === 'farmer' || state.user.email === p.seller_email);
+                const cleanPhone = p.contact ? p.contact.replace(/[^0-9+]/g, '') : '';
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-img-wrap">
+                        <img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy">
+                        <span class="cat-badge">${p.category || 'Crop'}</span>
+                        ${canDelete ? `<button class="delete-crop-btn" onclick="deleteProduct(${p.id})" title="Delete Listing"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                    </div>
+                    <div class="product-body">
+                        <h4 class="product-name">${p.name}</h4>
+                        <p class="product-desc">${p.description || 'Fresh harvested farm commodity direct from grower.'}</p>
+                        <div class="product-meta">
+                            <span><i class="fa-solid fa-location-dot" style="color:var(--primary);"></i> ${p.location}</span>
+                            <span><i class="fa-solid fa-user-check"></i> ${p.seller_name}</span>
+                        </div>
+                        <div class="product-meta" style="margin-bottom:10px;">
+                            ${cleanPhone ? `<a href="tel:${cleanPhone}" class="product-phone-link"><i class="fa-solid fa-phone"></i> Call Kisan: ${p.contact}</a>` : `<span><i class="fa-solid fa-phone"></i> ${p.contact}</span>`}
+                        </div>
+                        <div class="product-price-bar">
+                            <div class="price-text">₹${p.price} <span>/ ${p.unit || 'Kg'}</span></div>
+                            <button class="btn btn-sm" onclick="openBuyModal(${p.id})">
+                                <i class="fa-solid fa-basket-shopping"></i> Buy
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat, btn) {
+            state.currentCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            fetchProducts();
+        }
+
+        let searchDebounce;
+        function handleMarketSearch() {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                state.searchQuery = document.getElementById('market-search-input').value.trim();
+                fetchProducts();
+            }, 300);
+        }
+
+        // --- ADD & DELETE PRODUCT ---
+        function openSellModal() {
+            if(!state.user) {
+                showToast("Please login first to list produce.", "fa-arrow-right-to-bracket");
+                openAuthModal();
+                return;
+            }
+            document.getElementById('sell-modal').style.display = 'flex';
+        }
+        function closeSellModal() { document.getElementById('sell-modal').style.display = 'none'; }
+
+        async function handleProductAdd(e) {
+            e.preventDefault();
+            const name = document.getElementById('post-crop-name').value;
+            const category = document.getElementById('post-crop-cat').value;
+            const price = parseFloat(document.getElementById('post-crop-price').value);
+            const unit = document.getElementById('post-crop-unit').value;
+            const location = document.getElementById('post-crop-loc').value;
+            const contact = document.getElementById('post-crop-phone').value;
+            const desc = document.getElementById('post-crop-desc').value;
+            const fileInput = document.getElementById('post-crop-file');
+
+            let defaultImg = "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&q=80&w=600";
+            
+            const submitPayload = async (img) => {
+                try {
+                    const res = await fetch(`${API_BASE}/add_product`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name, category, price, unit, location, contact, desc,
+                            img: img,
+                            seller: state.user ? state.user.fullName : 'Verified Kisan',
+                            seller_email: state.user ? state.user.email : ''
+                        })
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        showToast("Your crop has been listed in Digital Mandi!");
+                        closeSellModal();
+                        fetchProducts();
+                        fetchStats();
+                        nav('products');
+                    } else {
+                        showToast(data.message || "Failed to list produce", "fa-triangle-exclamation");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Failed to connect to server", "fa-circle-xmark");
+                }
+            };
+
+            if(fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => submitPayload(event.target.result);
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                submitPayload(defaultImg);
+            }
+        }
+
+        async function deleteProduct(id) {
+            if(!confirm("Are you sure you want to remove this product listing?")) return;
+            try {
+                const res = await fetch(`${API_BASE}/delete_product/${id}`, { method: 'POST' });
+                const data = await res.json();
+                if(data.success) {
+                    showToast("Listing removed successfully.");
+                    fetchProducts();
+                    fetchStats();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // --- BUY & CART MANAGEMENT ---
+        function openBuyModal(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if(!product) return;
+            state.selectedBuyProduct = product;
+            
+            document.getElementById('buy-product-name').textContent = product.name;
+            document.getElementById('buy-product-price').textContent = `₹${product.price} / ${product.unit || 'Kg'}`;
+            document.getElementById('buy-qty-input').value = 1;
+            updateBuyTotal();
+            document.getElementById('buy-modal').style.display = 'flex';
+        }
+        function closeBuyModal() { document.getElementById('buy-modal').style.display = 'none'; }
+
+        function changeQty(delta) {
+            const input = document.getElementById('buy-qty-input');
+            let val = parseInt(input.value) + delta;
+            if(val < 1) val = 1;
+            input.value = val;
+            updateBuyTotal();
+        }
+
+        function updateBuyTotal() {
+            if(!state.selectedBuyProduct) return;
+            const qty = Math.max(1, parseInt(document.getElementById('buy-qty-input').value) || 1);
+            const total = qty * state.selectedBuyProduct.price;
+            document.getElementById('buy-total-price').textContent = `₹${total}`;
+        }
+
+        function confirmAddToCart() {
+            if(!state.selectedBuyProduct) return;
+            const qty = Math.max(1, parseInt(document.getElementById('buy-qty-input').value) || 1);
+            const item = {
+                id: state.selectedBuyProduct.id,
+                name: state.selectedBuyProduct.name,
+                price: state.selectedBuyProduct.price,
+                unit: state.selectedBuyProduct.unit || 'Kg',
+                qty: qty,
+                totalPrice: qty * state.selectedBuyProduct.price
+            };
+            state.cart.push(item);
+            localStorage.setItem('agro_cart', JSON.stringify(state.cart));
+            updateCartBadge();
+            closeBuyModal();
+            showToast(`Added ${qty} ${item.unit} ${item.name} to Basket!`);
+        }
+
+        function updateCartBadge() {
+            const countEl = document.getElementById('cart-count');
+            if(countEl) countEl.textContent = state.cart.length;
+        }
+
+        function openCartModal() {
+            const container = document.getElementById('cart-items-list');
+            container.innerHTML = '';
+            let total = 0;
+
+            if(state.cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:24px;">Your shopping basket is empty.</p>';
+                document.getElementById('cart-subtotal').textContent = '₹0';
+            } else {
+                state.cart.forEach((item, idx) => {
+                    total += item.totalPrice;
+                    container.innerHTML += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                            <div>
+                                <strong style="font-size:0.92rem;">${item.name}</strong>
+                                <div style="font-size:0.78rem; color:#64748b;">${item.qty} ${item.unit} x ₹${item.price}</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-weight:700; color:var(--primary-dark); font-size:0.95rem;">₹${item.totalPrice}</span>
+                                <button type="button" onclick="removeFromCart(${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1rem;" aria-label="Remove item"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('cart-subtotal').textContent = `₹${total}`;
+            }
+            document.getElementById('cart-modal').style.display = 'flex';
+        }
+        function closeCartModal() { document.getElementById('cart-modal').style.display = 'none'; }
+
+        function removeFromCart(idx) {
+            state.cart.splice(idx, 1);
+            localStorage.setItem('agro_cart', JSON.stringify(state.cart));
+            updateCartBadge();
+            openCartModal();
+        }
+
+        // --- ORDER PLACEMENT (DATABASE BACKED) ---
+        async function handleOrderPlacement(e) {
+            e.preventDefault();
+            if(state.cart.length === 0) { showToast("Basket is empty", "fa-triangle-exclamation"); return; }
+            
+            const btn = document.getElementById('place-order-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing Order...';
+
+            const address = document.getElementById('order-address').value;
+            const pincode = document.getElementById('order-pincode').value;
+            const payment = document.getElementById('order-payment').value;
+            const total = state.cart.reduce((s, i) => s + i.totalPrice, 0);
+
+            try {
+                const res = await fetch(`${API_BASE}/create_order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_email: state.user ? state.user.email : 'guest@kisan.com',
+                        user_name: state.user ? state.user.fullName : 'Valued Buyer',
+                        items: state.cart,
+                        total_amount: total,
+                        delivery_address: address,
+                        pincode: pincode,
+                        payment_method: payment
+                    })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    state.cart = [];
+                    localStorage.removeItem('agro_cart');
+                    updateCartBadge();
+                    closeCartModal();
+                    fetchStats();
+                    showToast("Order Confirmed! Tracking generated 🎉");
+                    nav('tracker');
+                } else {
+                    showToast(data.message || "Failed to place order", "fa-triangle-exclamation");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Order failed to connect to server", "fa-circle-xmark");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Place Order & Confirm Delivery';
+            }
+        }
+
+        let isFetchingOrders = false;
+        async function fetchOrders() {
+            if (isFetchingOrders) return;
+            isFetchingOrders = true;
+            const container = document.getElementById('orders-list-container');
+            container.innerHTML = '<p style="text-align:center; padding:30px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading orders from database...</p>';
+            
+            try {
+                const emailParam = state.user ? `?email=${encodeURIComponent(state.user.email)}` : '';
+                const res = await fetch(`${API_BASE}/orders${emailParam}`);
+                const data = await res.json();
+                
+                if(data.success && data.orders.length > 0) {
+                    container.innerHTML = '';
+                    data.orders.forEach(order => {
+                        const itemsSummary = order.items.map(i => `${i.name} (${i.qty} ${i.unit || 'Kg'})`).join(', ');
+                        container.innerHTML += `
+                            <div class="order-card">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #f1f5f9; padding-bottom:12px; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                                    <div>
+                                        <span style="font-size:0.75rem; font-weight:700; color:var(--primary-dark);">${order.order_code}</span>
+                                        <div style="font-weight:700; font-size:1rem; color:var(--text-dark);">Delivery to: ${order.delivery_address} (${order.pincode})</div>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <div style="font-size:1.25rem; font-weight:800; color:var(--primary-dark);">₹${order.total_amount}</div>
+                                        <span style="font-size:0.72rem; color:#64748b;">Payment: ${order.payment_method}</span>
+                                    </div>
+                                </div>
+                                <p style="font-size:0.85rem; margin-bottom:15px;"><strong>Items:</strong> ${itemsSummary}</p>
+                                
+                                <div class="order-timeline">
+                                    <div class="timeline-step completed">
+                                        <div class="timeline-icon"><i class="fa-solid fa-receipt"></i></div>
+                                        <div>
+                                            <div class="timeline-label">Confirmed</div>
+                                            <div class="timeline-time">${order.created_at ? order.created_at.slice(0,10) : 'Today'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-step active">
+                                        <div class="timeline-icon"><i class="fa-solid fa-box-open"></i></div>
+                                        <div>
+                                            <div class="timeline-label">Packed at Farm</div>
+                                            <div class="timeline-time">In Progress</div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-step">
+                                        <div class="timeline-icon"><i class="fa-solid fa-truck"></i></div>
+                                        <div>
+                                            <div class="timeline-label">In Transit</div>
+                                            <div class="timeline-time">Pending</div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-step">
+                                        <div class="timeline-icon"><i class="fa-solid fa-house-chimney"></i></div>
+                                        <div>
+                                            <div class="timeline-label">Delivered</div>
+                                            <div class="timeline-time">Est. 2 Days</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="card" style="text-align:center; padding:36px 18px;">
+                            <i class="fa-solid fa-truck fa-3x" style="color:#94a3b8; margin-bottom:12px;"></i>
+                            <h3 style="font-size:1.2rem; margin-bottom:4px;">No Orders Found</h3>
+                            <p style="color:#64748b; font-size:0.88rem; max-width:400px; margin:0 auto 16px;">Browse crops in Digital Mandi and place an order to track it live here.</p>
+                            <button class="btn" onclick="nav('products')">Go to Digital Mandi</button>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<p style="color:var(--danger); text-align:center;">Failed to load orders.</p>';
+            } finally {
+                isFetchingOrders = false;
+            }
+        }
+
+        // --- AI CROP DOCTOR SCANNING LOGIC ---
+        function handleLeafScan(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const preview = document.getElementById('leaf-preview');
+            const dropIcon = document.querySelector('.fa-cloud-arrow-up');
+            const scanBox = document.getElementById('drop-zone');
+            const loader = document.getElementById('doctor-loader');
+            const progress = document.getElementById('doctor-progress');
+            const resultCard = document.getElementById('diagnosis-result');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                if(dropIcon) dropIcon.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+
+            scanBox.classList.add('scanning');
+            resultCard.style.display = 'none';
+            loader.style.display = 'block';
+            setTimeout(() => { progress.style.width = '100%'; }, 100);
+
+            const crop = document.getElementById('doctor-crop-select').value;
+
+            setTimeout(async () => {
+                scanBox.classList.remove('scanning');
+                loader.style.display = 'none';
+                progress.style.width = '0%';
+
+                try {
+                    const res = await fetch(`${API_BASE}/diagnose`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ crop, email: state.user ? state.user.email : 'guest' })
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        const diag = data.diagnosis;
+                        document.getElementById('diag-disease-name').textContent = diag.disease;
+                        document.getElementById('diag-confidence-text').textContent = `${diag.confidence}%`;
+                        document.getElementById('diag-confidence-bar').style.width = `${diag.confidence}%`;
+                        document.getElementById('diag-chemical-text').textContent = diag.remedy;
+                        document.getElementById('diag-organic-text').textContent = diag.organic_remedy;
+                        document.getElementById('diag-severity-badge').textContent = `Severity: ${diag.severity}`;
+                        resultCard.style.display = 'block';
+                        showToast("AI Diagnostic Complete! 🌱");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Diagnosis API error", "fa-circle-xmark");
+                }
+            }, 2200);
+        }
+
+        // --- MAP INITIALIZATION ---
+        let leafletMap = null;
+        let mapMarkers = [];
+
+        function initMap() {
+            setTimeout(() => {
+                if (leafletMap) { leafletMap.invalidateSize(); return; }
+                leafletMap = L.map('map-container').setView([22.9734, 78.6569], 5);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(leafletMap);
+
+                const places = [
+                    { lat: 28.7041, lng: 77.1025, title: "Azadpur APMC Mandi", city: "Delhi", type: "mandi", color: "#3b82f6", info: "Asia's largest fruit & vegetable wholesale market." },
+                    { lat: 19.9975, lng: 73.7898, title: "Lasalgaon Onion Mandi", city: "Nashik, MH", type: "mandi", color: "#3b82f6", info: "Major benchmark hub for onion commodity trading." },
+                    { lat: 30.7333, lng: 76.7794, title: "Punjab Agro Cold Chain", city: "Ludhiana, PB", type: "storage", color: "#ef4444", info: "10,000 MT temperature-controlled grain storage facility." },
+                    { lat: 23.0225, lng: 72.5714, title: "Gujarat Cotton Hub & Farm", city: "Rajkot, GJ", type: "farm", color: "#10b981", info: "Certified organic long-staple cotton cultivation." },
+                    { lat: 26.9124, lng: 75.7873, title: "Jaipur Spices Warehouse", city: "Jaipur, RJ", type: "storage", color: "#ef4444", info: "Cold storage for high-value cumin and coriander." },
+                    { lat: 34.0837, lng: 74.7973, title: "Kashmir Apple Orchards", city: "Srinagar, J&K", type: "farm", color: "#10b981", info: "GI certified Kashmiri Red Delicious Apple producers." }
+                ];
+
+                places.forEach(p => {
+                    const marker = L.circleMarker([p.lat, p.lng], {
+                        radius: 9,
+                        fillColor: p.color,
+                        color: "#ffffff",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.85
+                    }).addTo(leafletMap);
+
+                    marker.bindPopup(`
+                        <div style="font-family:'Plus Jakarta Sans',sans-serif; min-width:160px;">
+                            <strong style="font-size:0.95rem; color:#0f172a;">${p.title}</strong><br>
+                            <span style="font-size:0.72rem; text-transform:uppercase; font-weight:700; color:${p.color};">${p.type} • ${p.city}</span>
+                            <p style="font-size:0.8rem; margin-top:4px; color:#475569;">${p.info}</p>
+                        </div>
+                    `);
+                    mapMarkers.push({ marker, type: p.type });
+                });
+            }, 250);
+        }
+
+        function filterMapMarkers(type, btn) {
+            document.querySelectorAll('.map-filters .cat-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            mapMarkers.forEach(({ marker, type: mType }) => {
+                if (type === 'all' || mType === type) {
+                    marker.addTo(leafletMap);
+                } else {
+                    leafletMap.removeLayer(marker);
+                }
+            });
+        }
+
+        // --- CHARTS & ESTIMATOR LOGIC ---
+        let trendChart = null;
+        const trendData = {
+            'Wheat': [2100, 2180, 2240, 2390, 2450, 2520],
+            'Rice': [2900, 3050, 3100, 3250, 3180, 3400],
+            'Onion': [1200, 1450, 1800, 2100, 1950, 2600],
+            'Potato': [850, 920, 1050, 1150, 1280, 1350],
+            'Cotton': [5800, 6000, 6150, 6300, 6200, 6450]
+        };
+
+        function initCharts() {
+            if(trendChart) return;
+            const ctx = document.getElementById('priceTrendCanvas');
+            if(!ctx) return;
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar (Current)'],
+                    datasets: [{
+                        label: 'Wheat Price (₹/Quintal)',
+                        data: trendData['Wheat'],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 4,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { ticks: { font: { size: 10 } } },
+                        y: { ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function updateChartData(crop) {
+            if(!trendChart || !trendData[crop]) return;
+            trendChart.data.datasets[0].data = trendData[crop];
+            trendChart.data.datasets[0].label = `${crop} Price (₹/Quintal)`;
+            trendChart.update();
+        }
+
+        function handlePriceEstimation(e) {
+            e.preventDefault();
+            const crop = document.getElementById('calc-crop').value;
+            const qty = parseFloat(document.getElementById('calc-qty').value) || 1;
+            
+            const rates = { 'Wheat': 2450, 'Rice': 3400, 'Onion': 2600, 'Potato': 1350, 'Cotton': 6450 };
+            const baseRate = rates[crop] || 2000;
+            const randomVar = Math.floor(Math.random() * 80) - 40;
+            const finalRate = baseRate + randomVar;
+            const totalRev = finalRate * qty;
+
+            document.getElementById('calc-rate-val').textContent = `₹${finalRate.toLocaleString('en-IN')} / Qtl`;
+            document.getElementById('calc-revenue-val').textContent = `₹${totalRev.toLocaleString('en-IN')}`;
+            document.getElementById('calc-result').style.display = 'block';
+
+            updateChartData(crop);
+        }
+
+        // --- REAL WEATHER API ---
+        async function loadLiveWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=28.6139&longitude=77.2090&current_weather=true');
+                const data = await res.json();
+                if(data.current_weather) {
+                    const temp = data.current_weather.temperature;
+                    const code = data.current_weather.weathercode;
+                    document.getElementById('weather-temp-val').textContent = `${temp}°C`;
+                    
+                    let condition = "Sunny & Clear";
+                    let iconClass = "fa-cloud-sun";
+                    if(code > 0 && code <= 3) { condition = "Partly Cloudy"; iconClass = "fa-cloud-sun"; }
+                    else if(code >= 45 && code <= 48) { condition = "Morning Fog"; iconClass = "fa-smog"; }
+                    else if(code >= 51) { condition = "Light Rain"; iconClass = "fa-cloud-rain"; }
+
+                    document.getElementById('weather-condition-tag').textContent = condition;
+                    document.getElementById('weather-icon-el').className = `fa-solid ${iconClass}`;
+                }
+            } catch (e) {
+                console.warn("Weather fetch fallback", e);
+            }
+        }
+
+        // --- VOICE RECOGNITION ASSISTANT ---
+        function startVoiceAssist() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.lang = state.lang === 'en' ? 'en-IN' : 'hi-IN';
+                
+                const btn = document.getElementById('voice-btn');
+                btn.classList.add('listening');
+                showToast("Listening... Speak command (e.g. Mandi, Doctor, Map, Home)", "fa-microphone");
+
+                recognition.onresult = (event) => {
+                    btn.classList.remove('listening');
+                    const text = event.results[0][0].transcript.toLowerCase();
+                    showToast(`Command: "${text}"`, "fa-bullhorn");
+
+                    if(text.includes('market') || text.includes('mandi') || text.includes('bajar')) nav('products');
+                    else if(text.includes('doctor') || text.includes('bimari') || text.includes('rog')) nav('ai-doctor');
+                    else if(text.includes('map') || text.includes('naksha')) nav('map');
+                    else if(text.includes('home') || text.includes('ghar')) nav('home');
+                    else if(text.includes('order') || text.includes('kharid')) nav('tracker');
+                    else showToast("Try saying: 'Mandi', 'Doctor', or 'Map'", "fa-circle-question");
+                };
+
+                recognition.onerror = () => {
+                    btn.classList.remove('listening');
+                    showToast("Voice recognition error.", "fa-circle-exclamation");
+                };
+                recognition.start();
+            } else {
+                alert("Voice commands are supported in Google Chrome & Edge browsers.");
+            }
+        }
+
+        // --- INITIALIZATION ON PAGE LOAD ---
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAuthUI();
+            updateCartBadge();
+            fetchProducts();
+            fetchStats();
+            loadLiveWeather();
+        });
+    </script>
+</body>
+</html>
